@@ -1,4 +1,4 @@
-FROM srsgui-builder-fedora-26:latest
+FROM quay.io/vvvelichkov/srsgui:docker_fedora_26
 
 RUN dnf install -y \
 		gcc-c++ \
