@@ -1,1 +1,1 @@
-docker/fedora/26/Builder.Dockerfile
+docker/srsgui/fedora/26/Builder.Dockerfile
