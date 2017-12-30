@@ -223,9 +223,13 @@ void rrc::rem_user(uint16_t rnti)
   if (users.count(rnti) == 1) {
     rrc_log->console("Disconnecting rnti=0x%x.\n", rnti);
     rrc_log->info("Disconnecting rnti=0x%x.\n", rnti);
-    /* **Caution** order of removal here is imporant: from bottom to top */
+    /* **Caution** order of removal here is important: from bottom to top */
     mac->ue_rem(rnti);  // MAC handles PHY
+
+    pthread_mutex_unlock(&user_mutex);
     usleep(50000);
+    pthread_mutex_lock(&user_mutex);
+
     rlc->rem_user(rnti);
     pdcp->rem_user(rnti);
     gtpu->rem_user(rnti);
@@ -695,10 +699,19 @@ rrc::ue::ue()
 {
   parent           = NULL; 
   set_activity();
-  sr_allocated     = false; 
   has_tmsi         = false;
   connect_notified = false; 
   transaction_id   = 0;
+  sr_allocated     = false;
+  sr_sched_sf_idx  = 0;
+  sr_sched_prb_idx = 0;
+  sr_N_pucch       = 0;
+  sr_I             = 0;
+  cqi_allocated    = false;
+  cqi_pucch        = 0;
+  cqi_idx          = 0;
+  cqi_sched_sf_idx = 0;
+  cqi_sched_prb_idx = 0;
   state            = RRC_STATE_IDLE;
 }
 
@@ -764,9 +777,9 @@ bool rrc::ue::is_timeout()
   }
   
   if (deadline_str) {
-    uint64_t deadline = deadline_s*1e6  + deadline_us; 
-    uint64_t elapsed  = t[0].tv_sec*1e6 + t[0].tv_usec;
-    if (elapsed > deadline) {
+    int64_t deadline = deadline_s*1e6  + deadline_us;
+    int64_t elapsed  = t[0].tv_sec*1e6 + t[0].tv_usec;
+    if (elapsed > deadline && elapsed > 0) {
       parent->rrc_log->warning("User rnti=0x%x expired %s deadline: %d:%d>%d:%d us\n", 
                                 rnti, deadline_str, 
                                 t[0].tv_sec, t[0].tv_usec, 
