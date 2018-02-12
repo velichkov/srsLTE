@@ -67,7 +67,7 @@ s1ap::cleanup(void)
 }
 
 int
-s1ap::init(s1ap_args_t s1ap_args, srslte::log_filter *s1ap_log)
+s1ap::init(s1ap_args_t s1ap_args, srslte::log_filter *s1ap_log, hss_interface_s1ap * hss_)
 {
   m_pool = srslte::byte_buffer_pool::get_instance();
 
@@ -77,17 +77,17 @@ s1ap::init(s1ap_args_t s1ap_args, srslte::log_filter *s1ap_log)
   //Init log
   m_s1ap_log = s1ap_log;
 
+  //Get pointer to the HSS
+  m_hss = hss_;
+
   //Init message handlers
   m_s1ap_mngmt_proc = s1ap_mngmt_proc::get_instance(); //Managment procedures
   m_s1ap_mngmt_proc->init();
   m_s1ap_nas_transport = s1ap_nas_transport::get_instance(); //NAS Transport procedures
-  m_s1ap_nas_transport->init();
+  m_s1ap_nas_transport->init(m_hss);
   m_s1ap_ctx_mngmt_proc = s1ap_ctx_mngmt_proc::get_instance(); //Context Management Procedures
   m_s1ap_ctx_mngmt_proc->init();
 
-
-  //Get pointer to the HSS
-  m_hss = hss::get_instance();
 
   //Get pointer to GTP-C class
   m_mme_gtpc = mme_gtpc::get_instance();
@@ -193,6 +193,7 @@ s1ap::enb_listen()
   evnts.sctp_data_io_event = 1;
   evnts.sctp_shutdown_event=1;
   if(setsockopt(sock_fd, IPPROTO_SCTP, SCTP_EVENTS, &evnts, sizeof (evnts))){
+    close(sock_fd);
     m_s1ap_log->console("Subscribing to sctp_data_io_events failed\n");
     return -1;
   }
@@ -204,6 +205,7 @@ s1ap::enb_listen()
   s1mme_addr.sin_port = htons(S1MME_PORT);
   err = bind(sock_fd, (struct sockaddr*) &s1mme_addr, sizeof (s1mme_addr));
   if (err != 0){
+    close(sock_fd);
     m_s1ap_log->error("Error binding SCTP socket\n");
     m_s1ap_log->console("Error binding SCTP socket\n");
     return -1;
@@ -212,6 +214,7 @@ s1ap::enb_listen()
   //Listen for connections
   err = listen(sock_fd,SOMAXCONN);
   if (err != 0){
+    close(sock_fd);
     m_s1ap_log->error("Error in SCTP socket listen\n");
     m_s1ap_log->console("Error in SCTP socket listen\n");
     return -1;

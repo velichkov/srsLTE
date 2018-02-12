@@ -48,8 +48,11 @@ namespace srsenb {
 
 phy::phy() : workers_pool(MAX_WORKERS), 
              workers(MAX_WORKERS), 
-             workers_common(txrx::MUTEX_X_WORKER*MAX_WORKERS)
+             workers_common(txrx::MUTEX_X_WORKER*MAX_WORKERS),
+             nof_workers(0)
 {
+  radio_handler = NULL;
+  bzero(&prach_cfg, sizeof(prach_cfg));
 }
 
 void phy::parse_config(phy_cfg_t* cfg)
@@ -94,7 +97,7 @@ bool phy::init(phy_args_t *args,
 {
   std::vector<void*> log_vec;
   for (int i=0;i<args->nof_phy_threads;i++) {
-    log_vec[i] = (void*) log_h;
+    log_vec.push_back((void*)log_h);
   }
   init(args, cfg, radio_handler_, mac, log_vec);
   return true; 
