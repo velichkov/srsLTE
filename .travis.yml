@@ -1,10 +1,25 @@
 dist: xenial
 sudo: required
 
-language: c
+language: minimal
 compiler:
   - gcc
 #  - clang
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+      - build-essential
+      - cmake
+      - libfftw3-dev
+      - libmbedtls-dev
+      - libpcsclite-dev
+      - libboost-program-options-dev
+      - libconfig++-dev
+      - libsctp-dev
 
 env:
 #  - CMAKE_BUILD_TYPE=
@@ -16,16 +31,15 @@ env:
     CFLAGS='-fsanitize=undefined -O3 -g -DNDEBUG'
     CXXFLAGS='-fsanitize=undefined -O3 -g -DNDEBUG'
     MAKE_TEST_ENV='ASAN_OPTIONS=fast_unwind_on_malloc=0:report_objects=1'
+    CC=gcc-7 CXX=g++-7
 #  - CMAKE_CONFIG_FLAGS='-DENABLE_MSAN=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo'
 #    CFLAGS='-fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins'
 #    CXXFLAGS='-fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins'
 #    MAKE_TEST_ENV='MSAN_OPTIONS=poison_in_dtor=1'
 
 before_script:
-   - sudo apt-get -qq update
-   - sudo apt-get install -qq build-essential cmake libfftw3-dev libmbedtls-dev libpcsclite-dev libboost-program-options-dev libconfig++-dev libsctp-dev
 
-language: cpp
+#language: cpp
 script:
  - mkdir build
  - cd build
