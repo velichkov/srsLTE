@@ -6,6 +6,13 @@ compiler:
   - gcc
   - clang
 
+env:
+  - CMAKE_BUILD_TYPE=
+  - CMAKE_BUILD_TYPE=Debug
+  - CMAKE_BUILD_TYPE=Release
+  - CMAKE_BUILD_TYPE=RelWithDebInfo
+  - CMAKE_CONFIG_FLAGS="-DDISABLE_SIMD=ON -DENABLE_SSE=OFF -DENABLE_AVX=OFF -DENABLE_AVX2=OFF -DENABLE_AVX512=OFF -DENABLE_FMA=OFF"
+
 before_script:
    - sudo apt-get -qq update
    - sudo apt-get install -qq build-essential cmake libfftw3-dev libmbedtls-dev libpcsclite-dev libboost-program-options-dev libconfig++-dev libsctp-dev
@@ -14,7 +21,7 @@ language: cpp
 script:
  - mkdir build
  - cd build
- - cmake -DRF_FOUND=True ..
+ - cmake -DRF_FOUND=True -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE $CMAKE_CONFIG_FLAGS ..
  - make
  - make test
  - sudo make install
