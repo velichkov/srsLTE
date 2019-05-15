@@ -7,13 +7,19 @@ compiler:
 #  - clang
 
 env:
-  - CMAKE_BUILD_TYPE=
-  - CMAKE_BUILD_TYPE=Debug
-  - CMAKE_BUILD_TYPE=Release
-  - CMAKE_BUILD_TYPE=RelWithDebInfo
+#  - CMAKE_BUILD_TYPE=
+#  - CMAKE_BUILD_TYPE=Debug
+#  - CMAKE_BUILD_TYPE=Release
+#  - CMAKE_BUILD_TYPE=RelWithDebInfo
 #  - CMAKE_CONFIG_FLAGS="-DDISABLE_SIMD=ON -DENABLE_SSE=OFF -DENABLE_AVX=OFF -DENABLE_AVX2=OFF -DENABLE_AVX512=OFF -DENABLE_FMA=OFF"
-  - CMAKE_CONFIG_FLAGS="-DENABLE_ASAN=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
-  - CMAKE_CONFIG_FLAGS="-DENABLE_MSAN=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+  - CMAKE_CONFIG_FLAGS='-DENABLE_ASAN=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS_RELWITHDEBINFO= -DCMAKE_C_FLAGS_RELWITHDEBINFO='
+    CFLAGS='-fsanitize=undefined -O3 -g -DNDEBUG'
+    CXXFLAGS='-fsanitize=undefined -O3 -g -DNDEBUG'
+    MAKE_TEST_ENV='ASAN_OPTIONS=fast_unwind_on_malloc=0:report_objects=1'
+#  - CMAKE_CONFIG_FLAGS='-DENABLE_MSAN=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo'
+#    CFLAGS='-fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins'
+#    CXXFLAGS='-fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins'
+#    MAKE_TEST_ENV='MSAN_OPTIONS=poison_in_dtor=1'
 
 before_script:
    - sudo apt-get -qq update
@@ -24,6 +30,6 @@ script:
  - mkdir build
  - cd build
  - cmake -DRF_FOUND=True -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE $CMAKE_CONFIG_FLAGS ..
- - make
- - make test
+ - make VERBOSE=1
+ - $MAKE_TEST_ENV make test
  - sudo make install
