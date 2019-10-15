@@ -1,5 +1,8 @@
 dist: xenial
 sudo: required
+arch:
+  - amd64
+  - arm64
 
 before_script:
    - sudo apt-get -qq update
