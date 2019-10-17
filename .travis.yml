@@ -6,9 +6,6 @@ before_script:
    - sudo apt-get install -qq build-essential cmake libfftw3-dev libmbedtls-dev libpcsclite-dev libboost-program-options-dev libconfig++-dev libsctp-dev colordiff
 
 language: cpp
-compiler:
-  - gcc
-  - clang
 
 addons:
   apt:
@@ -16,7 +13,17 @@ addons:
       - llvm-toolchain-trusty-8
       - key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
+      - clang-8
       - clang-format-8
+
+jobs:
+  - include:
+    - name: "gcc"
+      env:
+        - CC=gcc CXX=g++
+    - name: "clang"
+      env:
+        - CC=clang-8 CXX=clang++-8
 
 script:
  - sudo ln -s /usr/bin/clang-format-diff-8 /usr/bin/clang-format-diff
