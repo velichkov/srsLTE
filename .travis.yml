@@ -1,9 +1,9 @@
-dist: xenial
+dist: bionic
 sudo: required
 
 before_script:
    - sudo apt-get -qq update
-   - sudo apt-get install -qq build-essential cmake libfftw3-dev libmbedtls-dev libpcsclite-dev libboost-program-options-dev libconfig++-dev libsctp-dev colordiff
+   - sudo apt-get install -qq build-essential cmake libfftw3-dev libmbedtls-dev libpcsclite-dev libboost-program-options-dev libconfig++-dev libsctp-dev colordiff clang-format
 
 language: cpp
 
@@ -13,16 +13,8 @@ arch:
 
 os: linux
 
-addons:
-  apt:
-    sources:
-      - llvm-toolchain-trusty-8
-      - key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
-    packages:
-      - clang-format-8
-
 script:
- - sudo ln -s /usr/bin/clang-format-diff-8 /usr/bin/clang-format-diff
+ - ls -l /usr/bin/clang*
  - git remote set-branches --add origin master
  - git fetch
  - |
