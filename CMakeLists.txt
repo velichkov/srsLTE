@@ -85,8 +85,15 @@ option(ENABLE_TIDY     "Enable clang tidy"                        OFF)
 option(USE_LTE_RATES   "Use standard LTE sampling rates"          OFF)
 option(USE_GLIBC_IPV6  "Use glibc's own ipv6.h"                   ON)
 
-set(GCC_ARCH native CACHE STRING "GCC compile for specific architecture.")
-
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
+  set(GCC_ARCH armv8-a CACHE STRING "GCC compile for specific architecture.")
+  set(HAVE_NEONv8 "True")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHAVE_NEONv8")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_NEONv8")
+  message(STATUS "Detected aarch64 processor")
+else(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
+  set(GCC_ARCH native CACHE STRING "GCC compile for specific architecture.")
+endif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
 
 ########################################################################
 # Find dependencies
@@ -361,8 +368,12 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   endif(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
   if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DIS_ARM -DHAVE_NEON -mfloat-abi=hard -mfpu=neon")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DIS_ARM -mfloat-abi=hard -mfpu=neon")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DIS_ARM -DHAVE_NEON ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DIS_ARM")
+    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfloat-abi=hard -mfpu=neon")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfloat-abi=hard -mfpu=neon")
+    endif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
     message(STATUS "Detected ARM processor")
     set(HAVE_NEON "True")
   else(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch")
