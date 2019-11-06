@@ -29,5 +29,5 @@ script:
  - cd build
  - cmake -DRF_FOUND=True ..
  - make -j $(nproc)
- - make test ARGS="--output-on-failure -j $(nproc)"
+ - travis_wait 40 make test ARGS="--output-on-failure -j $(nproc)"
  - sudo make install
