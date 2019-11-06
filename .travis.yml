@@ -28,6 +28,6 @@ script:
  - mkdir build
  - cd build
  - cmake -DRF_FOUND=True ..
- - make
- - make test
+ - make -j $(nproc)
+ - make test ARGS="--output-on-failure -j $(nproc)"
  - sudo make install
